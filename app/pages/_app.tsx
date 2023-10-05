@@ -12,7 +12,7 @@ import "@rainbow-me/rainbowkit/styles.css";
 import type { AppProps } from "next/app";
 import NextNProgress from "nextjs-progressbar";
 import { SnackbarProvider } from "notistack";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { WagmiConfig, configureChains, createConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
 
