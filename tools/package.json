@@ -10,6 +10,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@jpmorganchase/onyx-ssi-sdk": "^0.0.1"
+    "@jpmorganchase/onyx-ssi-sdk": "^0.0.1",
+    "dotenv": "^16.3.1"
   }
 }

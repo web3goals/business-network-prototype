@@ -1,8 +1,6 @@
 import {
   EthrDIDMethod,
   JWTService,
-  KeyDIDMethod,
-  PROOF_OF_NAME,
   ProviderConfigs,
   createCredential,
   createPresentation,
@@ -10,60 +8,58 @@ import {
   verifyCredentialJWT,
   verifyPresentationJWT,
 } from "@jpmorganchase/onyx-ssi-sdk";
+import * as dotenv from "dotenv";
+
+dotenv.config();
+
+const ethrProvider: ProviderConfigs = {
+  name: "maticmum",
+  rpcUrl: "https://rpc-mumbai.maticvigil.com/",
+  registry: "0x41D788c9c5D335362D713152F407692c5EEAfAae",
+};
+const ethrDidMethod = new EthrDIDMethod(ethrProvider);
+const jwtService = new JWTService();
 
 async function main() {
-  const ethrProvider: ProviderConfigs = {
-    name: "maticmum",
-    rpcUrl: "https://rpc-mumbai.maticvigil.com/",
-    registry: "0x41D788c9c5D335362D713152F407692c5EEAfAae",
-  };
-  const didEthr = new EthrDIDMethod(ethrProvider);
-  const didKey = new KeyDIDMethod();
-
   console.log("\n----------------------Create DIDs------------------");
 
-  // Create DID for Issuer (did:ethr)
-  const issuerDid = await didEthr.create();
+  const issuerDid = await ethrDidMethod.generateFromPrivateKey(
+    process.env.ISSUER_PRIVATE_KEY as string
+  );
   console.log("issuerDid", issuerDid);
 
-  // Create DID for Holder of Credential (did:key)
-  const holderDid = await didKey.create();
+  const holderDid = await ethrDidMethod.generateFromPrivateKey(
+    process.env.HOLDER_PRIVATE_KEY as string
+  );
   console.log("holderDid", holderDid);
 
   console.log("\n----------------------Create VC------------------");
 
-  // Create DID for VC to support Revocation of Credential
-  const vcDID = await didEthr.create();
-
-  // Create a 'Proof of Name' VC
-  const subjectData = {
-    name: "Ollie",
+  const vcDid = await ethrDidMethod.create();
+  const vcSubject = {
+    feedback: "Great artist!",
   };
-
-  // Additonal parameters can be added to VC including:
-  // vc id, expirationDate, credentialStatus, credentialSchema, etc
-  const additionalParams = {
-    id: vcDID.did,
-    expirationDate: "2024-01-01T19:23:24Z",
+  const vcAdditionalParams = {
+    id: vcDid.did,
+    expirationDate: "2024-01-01T12:00:00Z",
   };
-
-  const vc = await createCredential(
+  const vcType = "PrivateFeedback";
+  const vc = createCredential(
     issuerDid.did,
     holderDid.did,
-    subjectData,
-    [PROOF_OF_NAME],
-    additionalParams
+    vcSubject,
+    [vcType],
+    vcAdditionalParams
   );
   console.log("vc", JSON.stringify(vc, null, 2));
 
-  const jwtService = new JWTService();
-  const jwtVC = await jwtService.signVC(issuerDid, vc);
-  console.log("jwtVC", jwtVC);
+  const jwtVc = await jwtService.signVC(issuerDid, vc);
+  console.log("jwtVc", jwtVc);
 
   console.log("\n-----------------Create VP---------------");
 
   // Create Presentation from VC JWT
-  const vp = createPresentation(holderDid.did, [jwtVC]);
+  const vp = createPresentation(holderDid.did, [jwtVc]);
   console.log("vp", JSON.stringify(vp, null, 2));
 
   const jwtVP = await jwtService.signVP(holderDid, vp);
@@ -72,10 +68,10 @@ async function main() {
   console.log("\n----------------------Verify VC/VP------------------");
 
   // Create DID resolvers
-  const didResolver = getSupportedResolvers([didKey, didEthr]);
+  const didResolver = getSupportedResolvers([ethrDidMethod]);
 
   // Verify VC JWT from Issuer
-  const resultVc = await verifyCredentialJWT(jwtVC, didResolver);
+  const resultVc = await verifyCredentialJWT(jwtVc, didResolver);
   console.log(resultVc);
 
   // Verify VP JWT from Holder
