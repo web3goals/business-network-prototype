@@ -6,8 +6,14 @@ import {
   DialogContentProps,
   Divider,
   DividerProps,
+  Select,
+  SelectProps,
   Skeleton,
   SkeletonProps,
+  TextField,
+  TextFieldProps,
+  Typography,
+  TypographyProps,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 
@@ -76,6 +82,77 @@ export const CardBox = styled(Box)<BoxProps>(({ theme }) => ({
   borderWidth: "5px",
   borderRadius: "10px",
   padding: "18px 24px",
+}));
+
+export const WidgetBox = styled(Box)<BoxProps>(({ theme }) => ({
+  width: "100%",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  padding: "16px 32px",
+  borderRadius: "12px",
+  [theme.breakpoints.up("md")]: {
+    flexDirection: "row",
+  },
+}));
+
+export const WidgetTitle = styled(Typography)<TypographyProps>(({ theme }) => ({
+  color: "#FFFFFF",
+  fontSize: "1.8rem",
+  fontWeight: 700,
+  minWidth: "0px",
+  marginRight: "0px",
+  marginBottom: "8px",
+  [theme.breakpoints.up("md")]: {
+    fontSize: "2.125rem",
+    minWidth: "200px",
+    marginRight: "24px",
+    marginBottom: "0px",
+  },
+}));
+
+export const WidgetContentBox = styled(Box)<BoxProps>(({ theme }) => ({
+  backgroundColor: "#FFFFFF",
+  borderRadius: "12px",
+  padding: "14px 20px",
+}));
+
+export const WidgetText = styled(Typography)<TypographyProps>(({ theme }) => ({
+  backgroundColor: "#FFFFFF",
+  borderRadius: "12px",
+  padding: "14px 20px",
+}));
+
+export const WidgetInputTextField = styled(TextField)<TextFieldProps>(
+  ({ theme }) => ({
+    width: "120px",
+    backgroundColor: "#FFFFFF",
+    borderRadius: "12px",
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        border: "0px",
+        borderRadius: "12px",
+      },
+      "&:hover fieldset": {
+        border: "4px solid #000000",
+      },
+      "&.Mui-focused fieldset": {
+        border: "4px solid #000000",
+      },
+    },
+  })
+);
+
+export const WidgetInputSelect = styled(Select)<SelectProps>(({ theme }) => ({
+  width: "120px",
+  backgroundColor: "#FFFFFF",
+  borderRadius: "12px",
+  "&:hover .MuiOutlinedInput-notchedOutline": {
+    border: "4px solid #000000",
+  },
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    border: "4px solid #000000",
+  },
 }));
 
 export const DialogCenterContent = styled(DialogContent)<DialogContentProps>(

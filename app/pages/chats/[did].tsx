@@ -1,16 +1,23 @@
+import SendMessageDialog from "@/components/dialog/SendMessageDialog";
 import EntityList from "@/components/entity/EntityList";
 import Layout from "@/components/layout";
-import { CardBox, FullWidthSkeleton } from "@/components/styled";
+import {
+  CardBox,
+  FullWidthSkeleton,
+  LargeLoadingButton,
+} from "@/components/styled";
+import { DialogContext } from "@/context/dialog";
 import useError from "@/hooks/useError";
 import useSigner from "@/hooks/useSigner";
 import { theme } from "@/theme";
 import { didToAddress, didToShortAddress } from "@/utils/pushprotocol";
-import { Avatar, Box, Link as MuiLink, Typography } from "@mui/material";
+import { Avatar, Box, Link as MuiLink, Stack, Typography } from "@mui/material";
 import { IMessageIPFS, PushAPI } from "@pushprotocol/restapi";
 import { ENV } from "@pushprotocol/restapi/src/lib/constants";
+import { EVENTS, createSocketConnection } from "@pushprotocol/socket";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 /**
  * Page with a chat.
@@ -18,6 +25,7 @@ import { useEffect, useState } from "react";
 export default function Chat() {
   const router = useRouter();
   const { did } = router.query;
+  const { showDialog, closeDialog } = useContext(DialogContext);
   const { handleError } = useError();
   const { signer } = useSigner();
   const [messages, setMessages] = useState<IMessageIPFS[] | undefined>();
@@ -26,9 +34,23 @@ export default function Chat() {
     setMessages(undefined);
     try {
       if (signer && did) {
+        // Init user
         const user = await PushAPI.initialize(signer, { env: ENV.STAGING });
+        // Load messages
         const messages = await user.chat.history(did as string);
         setMessages(messages);
+        // Init websocket to listen messages
+        const pushSDKSocket = createSocketConnection({
+          user: did as string,
+          socketType: "chat",
+          socketOptions: { autoConnect: true, reconnectionAttempts: 3 },
+          env: ENV.STAGING,
+        });
+        pushSDKSocket?.on(EVENTS.CHAT_RECEIVED_MESSAGE, (message) => {
+          user.chat
+            .decrypt([message])
+            .then((message) => setMessages([...message, ...messages]));
+        });
       }
     } catch (error: any) {
       handleError(error, true);
@@ -54,13 +76,31 @@ export default function Chat() {
               <MuiLink>{didToShortAddress(did as string)}</MuiLink>
             </Link>
           </Typography>
+          <Stack mt={2} spacing={2} alignItems="center">
+            <LargeLoadingButton
+              variant="contained"
+              onClick={() =>
+                showDialog?.(
+                  <SendMessageDialog
+                    recipientDid={did as string}
+                    onClose={closeDialog}
+                  />
+                )
+              }
+            >
+              Send Message
+            </LargeLoadingButton>
+            <LargeLoadingButton variant="outlined">
+              Send Private Feedback
+            </LargeLoadingButton>
+          </Stack>
           <EntityList
             entities={messages}
             renderEntityCard={(message, index) => (
               <MessageCard message={message} key={index} />
             )}
             noEntitiesText="😐 no messages"
-            sx={{ mt: 2 }}
+            sx={{ mt: 4 }}
           />
         </>
       ) : (
