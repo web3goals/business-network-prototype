@@ -7,11 +7,6 @@ import FormikHelper from "@/helper/FormikHelper";
 import useError from "@/hooks/useError";
 import useToasts from "@/hooks/useToast";
 import { theme } from "@/theme";
-import {
-  EthrDIDMethod,
-  getSupportedResolvers,
-  verifyCredentialJWT,
-} from "@jpmorganchase/onyx-ssi-sdk";
 import { Dialog, Typography } from "@mui/material";
 import { Form, Formik } from "formik";
 import { useState } from "react";
@@ -59,6 +54,11 @@ export default function AddVcDialog(props: {
   async function submit(values: any) {
     try {
       setIsFormSubmitting(true);
+      const {
+        EthrDIDMethod,
+        getSupportedResolvers,
+        verifyCredentialJWT,
+      } = await import("@jpmorganchase/onyx-ssi-sdk");
       // Verify VC
       const ethrDidMethod = new EthrDIDMethod({
         name: ONYX_SSI_ETHR_PROVIDER_NAME,

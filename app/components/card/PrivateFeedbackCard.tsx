@@ -3,18 +3,19 @@ import {
   ONYX_SSI_ETHR_PROVIDER_REGISTRY,
   ONYX_SSI_ETHR_PROVIDER_RPC_URL,
 } from "@/constants/onyxSsi";
-import { EthrDIDMethod, JWTService } from "@jpmorganchase/onyx-ssi-sdk";
+import useError from "@/hooks/useError";
+import { theme } from "@/theme";
+import { SxProps, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { FullWidthSkeleton } from "../styled";
 import MessageCard from "./MessageCard";
-import { SxProps, Typography } from "@mui/material";
-import { theme } from "@/theme";
 
 export default function PrivateFeedbackCard(props: {
   vc: string;
   footer?: JSX.Element;
   sx?: SxProps;
 }) {
+  const { handleError } = useError();
   const [feedback, setFeedback] = useState<
     | {
         account: string;
@@ -24,22 +25,35 @@ export default function PrivateFeedbackCard(props: {
     | undefined
   >();
 
+  async function loadData() {
+    try {
+      setFeedback(undefined);
+      const { JWTService, EthrDIDMethod } = await import(
+        "@jpmorganchase/onyx-ssi-sdk"
+      );
+      const jwtService = new JWTService();
+      const decodedVc = jwtService.decodeJWT(props.vc);
+      const ethrDidMethod = new EthrDIDMethod({
+        name: ONYX_SSI_ETHR_PROVIDER_NAME,
+        rpcUrl: ONYX_SSI_ETHR_PROVIDER_RPC_URL,
+        registry: ONYX_SSI_ETHR_PROVIDER_REGISTRY,
+      });
+      setFeedback({
+        account: ethrDidMethod.convertDIDToAddress(decodedVc.payload.iss),
+        date: decodedVc.payload.nbf,
+        text: decodedVc.payload.vc.credentialSubject.feedback,
+      });
+    } catch (error) {
+      handleError(error as Error, true);
+    }
+  }
+
   /**
    * Parse VC to get feedback
    */
   useEffect(() => {
-    const jwtService = new JWTService();
-    const decodedVc = jwtService.decodeJWT(props.vc);
-    const ethrDidMethod = new EthrDIDMethod({
-      name: ONYX_SSI_ETHR_PROVIDER_NAME,
-      rpcUrl: ONYX_SSI_ETHR_PROVIDER_RPC_URL,
-      registry: ONYX_SSI_ETHR_PROVIDER_REGISTRY,
-    });
-    setFeedback({
-      account: ethrDidMethod.convertDIDToAddress(decodedVc.payload.iss),
-      date: decodedVc.payload.nbf,
-      text: decodedVc.payload.vc.credentialSubject.feedback,
-    });
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.vc]);
 
   if (!feedback) {
