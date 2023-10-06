@@ -1,11 +1,18 @@
+import {
+  ONYX_SSI_ETHR_PROVIDER_NAME,
+  ONYX_SSI_ETHR_PROVIDER_REGISTRY,
+  ONYX_SSI_ETHR_PROVIDER_RPC_URL,
+} from "@/constants/onyxSsi";
 import FormikHelper from "@/helper/FormikHelper";
 import useError from "@/hooks/useError";
-import useSigner from "@/hooks/useSigner";
 import useToasts from "@/hooks/useToast";
 import { theme } from "@/theme";
+import {
+  EthrDIDMethod,
+  getSupportedResolvers,
+  verifyCredentialJWT,
+} from "@jpmorganchase/onyx-ssi-sdk";
 import { Dialog, Typography } from "@mui/material";
-import { PushAPI } from "@pushprotocol/restapi";
-import { ENV } from "@pushprotocol/restapi/src/lib/constants";
 import { Form, Formik } from "formik";
 import { useState } from "react";
 import * as yup from "yup";
@@ -17,15 +24,13 @@ import {
   WidgetTitle,
 } from "../styled";
 
-export default function SendMessageDialog(props: {
-  recipientDid: string;
+export default function AddVcDialog(props: {
   isClose?: boolean;
   onClose?: Function;
-  onSend?: Function;
+  onAdd?: Function;
 }) {
   const { handleError } = useError();
   const { showToastSuccess } = useToasts();
-  const { signer } = useSigner();
 
   /**
    * Dialog states
@@ -36,10 +41,10 @@ export default function SendMessageDialog(props: {
    * Form states
    */
   const [formValues, setFormValues] = useState({
-    message: "",
+    vc: "",
   });
   const formValidationSchema = yup.object({
-    message: yup.string().required(),
+    vc: yup.string().required(),
   });
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
@@ -54,16 +59,28 @@ export default function SendMessageDialog(props: {
   async function submit(values: any) {
     try {
       setIsFormSubmitting(true);
-      if (!signer) {
-        throw new Error(`Signer is not defined`);
-      }
-      const user = await PushAPI.initialize(signer, { env: ENV.STAGING });
-      await user.chat.send(props.recipientDid, {
-        type: "Text",
-        content: values.message,
+      // Verify VC
+      const ethrDidMethod = new EthrDIDMethod({
+        name: ONYX_SSI_ETHR_PROVIDER_NAME,
+        rpcUrl: ONYX_SSI_ETHR_PROVIDER_RPC_URL,
+        registry: ONYX_SSI_ETHR_PROVIDER_REGISTRY,
       });
-      showToastSuccess("Message sent");
-      props.onSend?.();
+      const didResolver = getSupportedResolvers([ethrDidMethod]);
+      const verified = await verifyCredentialJWT(values.vc, didResolver);
+      if (!verified) {
+        throw new Error("VC is not verified");
+      }
+      // Add VC to local storage
+      const vcs = JSON.parse(localStorage.getItem("vcs") || "[]") as string[];
+      if (vcs.includes(values.vc)) {
+        throw new Error("VC is already added");
+      }
+      vcs.push(values.vc);
+      localStorage.setItem("vcs", JSON.stringify(vcs));
+      console.log("vcs", vcs);
+      // Show success message
+      showToastSuccess("VC added");
+      props.onAdd?.();
       close();
     } catch (error) {
       handleError(error as Error, true);
@@ -80,7 +97,10 @@ export default function SendMessageDialog(props: {
     >
       <DialogCenterContent>
         <Typography variant="h4" textAlign="center" fontWeight={700}>
-          💬 Send message
+          📩 Add verified credential
+        </Typography>
+        <Typography textAlign="center" mt={1}>
+          to use it for sending private feedback
         </Typography>
         <Formik
           initialValues={formValues}
@@ -96,21 +116,21 @@ export default function SendMessageDialog(props: {
               }}
             >
               <FormikHelper onChange={(values: any) => setFormValues(values)} />
-              {/* Message */}
+              {/* VC */}
               <WidgetBox bgcolor={theme.palette.primary.main} mt={2}>
-                <WidgetTitle>Message</WidgetTitle>
+                <WidgetTitle>VC</WidgetTitle>
                 <WidgetInputTextField
-                  id="message"
-                  name="message"
-                  placeholder="Hey!"
-                  value={values.message}
+                  id="vc"
+                  name="vc"
+                  placeholder="eyJhb..."
+                  value={values.vc}
                   onChange={handleChange}
-                  error={touched.message && Boolean(errors.message)}
-                  helperText={touched.message && errors.message}
+                  error={touched.vc && Boolean(errors.vc)}
+                  helperText={touched.vc && errors.vc}
                   disabled={isFormSubmitting}
                   multiline
                   minRows={2}
-                  maxRows={4}
+                  maxRows={8}
                   sx={{ width: 1 }}
                 />
               </WidgetBox>

@@ -1,17 +1,14 @@
+import MessageCard from "@/components/card/MessageCard";
 import SendMessageDialog from "@/components/dialog/SendMessageDialog";
+import SendPrivateFeedbackDialog from "@/components/dialog/SendPrivateFeedbackDialog";
 import EntityList from "@/components/entity/EntityList";
 import Layout from "@/components/layout";
-import {
-  CardBox,
-  FullWidthSkeleton,
-  LargeLoadingButton,
-} from "@/components/styled";
+import { FullWidthSkeleton, LargeLoadingButton } from "@/components/styled";
 import { DialogContext } from "@/context/dialog";
 import useError from "@/hooks/useError";
 import useSigner from "@/hooks/useSigner";
-import { theme } from "@/theme";
 import { didToAddress, didToShortAddress } from "@/utils/pushprotocol";
-import { Avatar, Box, Link as MuiLink, Stack, Typography } from "@mui/material";
+import { Link as MuiLink, Stack, Typography } from "@mui/material";
 import { IMessageIPFS, PushAPI } from "@pushprotocol/restapi";
 import { ENV } from "@pushprotocol/restapi/src/lib/constants";
 import { EVENTS, createSocketConnection } from "@pushprotocol/socket";
@@ -52,13 +49,15 @@ export default function Chat() {
             .then((message) => setMessages([...message, ...messages]));
         });
       }
-    } catch (error: any) {
-      handleError(error, true);
+    } catch (error) {
+      handleError(error as Error, true);
     }
   }
 
+  // TODO: Rollback
   useEffect(() => {
     loadData();
+    // setMessages([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signer, did]);
 
@@ -90,14 +89,30 @@ export default function Chat() {
             >
               Send Message
             </LargeLoadingButton>
-            <LargeLoadingButton variant="outlined">
+            <LargeLoadingButton
+              variant="outlined"
+              onClick={() =>
+                showDialog?.(
+                  <SendPrivateFeedbackDialog
+                    recipientDid={did as string}
+                    onClose={closeDialog}
+                  />
+                )
+              }
+            >
               Send Private Feedback
             </LargeLoadingButton>
           </Stack>
           <EntityList
             entities={messages}
-            renderEntityCard={(message, index) => (
-              <MessageCard message={message} key={index} />
+            renderEntityCard={(message: IMessageIPFS, index) => (
+              <MessageCard
+                account={didToAddress(message.fromDID)}
+                date={message.timestamp}
+                text={message.messageContent}
+                privateFeedbackDialogEnabled
+                key={index}
+              />
             )}
             noEntitiesText="😐 no messages"
             sx={{ mt: 4 }}
@@ -107,50 +122,5 @@ export default function Chat() {
         <FullWidthSkeleton />
       )}
     </Layout>
-  );
-}
-
-function MessageCard(props: { message: IMessageIPFS }) {
-  return (
-    <CardBox sx={{ display: "flex", flexDirection: "row" }}>
-      {/* Left part */}
-      <Box>
-        {/* Image */}
-        <Avatar
-          sx={{
-            width: 54,
-            height: 54,
-            borderRadius: 48,
-            background: theme.palette.divider,
-          }}
-        >
-          <Typography fontSize={18}>💬</Typography>
-        </Avatar>
-      </Box>
-      {/* Right part */}
-      <Box
-        width={1}
-        ml={3}
-        display="flex"
-        flexDirection="column"
-        alignItems="flex-start"
-      >
-        <Link
-          href={`/chats/${didToAddress(props.message.fromDID)}`}
-          passHref
-          legacyBehavior
-        >
-          <MuiLink variant="body2" fontWeight={700}>
-            {didToShortAddress(props.message.fromDID)}
-          </MuiLink>
-        </Link>
-        {props.message.timestamp && (
-          <Typography variant="body2" color="text.secondary">
-            {new Date(props.message.timestamp).toLocaleString()}
-          </Typography>
-        )}
-        <Typography mt={1}>{props.message.messageContent}</Typography>
-      </Box>
-    </CardBox>
   );
 }
