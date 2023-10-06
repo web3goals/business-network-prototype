@@ -1,3 +1,4 @@
+import { FAKES } from "@/constants/fakes";
 import { Profile } from "@lens-protocol/react-web";
 import { Link as MuiLink, SxProps, TypographyProps } from "@mui/material";
 import Link from "next/link";
@@ -18,6 +19,9 @@ export default function AccountLink(props: {
   let name = addressToShortAddress(props.account);
   if (props.accountLensProfile?.name) {
     name = props.accountLensProfile.name + ` (${name})`;
+  }
+  if (FAKES[props.account.toUpperCase()]?.name) {
+    name = FAKES[props.account.toUpperCase()]?.name + ` (${name})`;
   }
 
   return (

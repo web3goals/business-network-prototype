@@ -1,3 +1,4 @@
+import { FAKES } from "@/constants/fakes";
 import { NftImage, Profile, ProfilePictureSet } from "@lens-protocol/react-web";
 import { Avatar, SxProps, Typography } from "@mui/material";
 import { emojiAvatarForAddress } from "utils/avatars";
@@ -19,6 +20,9 @@ export default function AccountAvatar(props: {
   }
   if ((props.accountLensProfile?.picture as NftImage)?.uri) {
     avatar = (props.accountLensProfile?.picture as NftImage)?.uri;
+  }
+  if (FAKES[props.account.toUpperCase()]?.avatar) {
+    avatar = FAKES[props.account.toUpperCase()]?.avatar;
   }
 
   return (

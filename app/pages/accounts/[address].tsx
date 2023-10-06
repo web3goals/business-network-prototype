@@ -44,6 +44,7 @@ export default function Account() {
           />
           {/* Bio */}
           <AccountBio
+            account={address as string}
             accountLensProfile={accountLensProfiles?.[0]}
             sx={{ mt: 1 }}
           />
