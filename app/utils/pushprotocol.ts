@@ -1,6 +1,16 @@
 import { addressToShortAddress } from "./converters";
 
 /**
+ * Convert "0xC6F4..." to "eip155:0xC6F4...".
+ */
+export function addressToDid(address?: string): string {
+  if (!address) {
+    throw new Error(`Fail to converting address to DID: ${address}`);
+  }
+  return `eip155:${address}`;
+}
+
+/**
  * Convert "eip155:0xC6F4..." to "0xC6F4...".
  */
 export function didToAddress(did?: string): string {

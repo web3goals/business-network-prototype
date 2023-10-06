@@ -2,6 +2,8 @@ import { DialogProvider } from "@/context/dialog";
 import "@/styles/globals.css";
 import { theme } from "@/theme";
 import { getSupportedChains } from "@/utils/chains";
+import { LensConfig, LensProvider, production } from "@lens-protocol/react-web";
+import { bindings as wagmiBindings } from '@lens-protocol/wagmi';
 import { ThemeProvider } from "@mui/material";
 import {
   RainbowKitProvider,
@@ -15,6 +17,7 @@ import { SnackbarProvider } from "notistack";
 import { useEffect, useState } from "react";
 import { WagmiConfig, configureChains, createConfig } from "wagmi";
 import { publicProvider } from "wagmi/providers/public";
+
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [...getSupportedChains()],
@@ -34,6 +37,11 @@ const config = createConfig({
   webSocketPublicClient,
 });
 
+const lensConfig: LensConfig = {
+  bindings: wagmiBindings(),
+  environment: production,
+};
+
 export default function App({ Component, pageProps }: AppProps) {
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
@@ -41,24 +49,26 @@ export default function App({ Component, pageProps }: AppProps) {
    * Fix for hydration error (docs - https://github.com/vercel/next.js/discussions/35773#discussioncomment-3484225)
    */
   useEffect(() => {
-    setIsPageLoaded(true);
+     setIsPageLoaded(true);
   }, []);
 
   return (
     <WagmiConfig config={config}>
-      <RainbowKitProvider
-        chains={chains}
-        theme={lightTheme({ accentColor: theme.palette.primary.main })}
-      >
-        <ThemeProvider theme={theme}>
-          <SnackbarProvider maxSnack={3}>
-            <DialogProvider>
-              <NextNProgress height={4} color={theme.palette.primary.main} />
-              {isPageLoaded && <Component {...pageProps} />}
-            </DialogProvider>
-          </SnackbarProvider>
-        </ThemeProvider>
-      </RainbowKitProvider>
+       <LensProvider config={lensConfig}>
+        <RainbowKitProvider
+          chains={chains}
+          theme={lightTheme({ accentColor: theme.palette.primary.main })}
+        >
+          <ThemeProvider theme={theme}>
+            <SnackbarProvider maxSnack={3}>
+              <DialogProvider>
+                <NextNProgress height={4} color={theme.palette.primary.main} />
+                {isPageLoaded && <Component {...pageProps} />}
+              </DialogProvider>
+            </SnackbarProvider>
+          </ThemeProvider>
+        </RainbowKitProvider>
+       </LensProvider>
     </WagmiConfig>
   );
 }

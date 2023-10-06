@@ -77,7 +77,6 @@ export default function AddVcDialog(props: {
       }
       vcs.push(values.vc);
       localStorage.setItem("vcs", JSON.stringify(vcs));
-      console.log("vcs", vcs);
       // Show success message
       showToastSuccess("VC added");
       props.onAdd?.();

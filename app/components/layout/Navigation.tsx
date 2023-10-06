@@ -95,6 +95,18 @@ function Links(props: { sx?: SxProps }) {
           </MuiLink>
         </Link>
       )}
+      {isConnected && (
+        <Link href={`/chats`} passHref legacyBehavior>
+          <MuiLink
+            fontWeight={700}
+            color="inherit"
+            display={{ xs: "none", sm: "flex" }}
+            ml={4}
+          >
+            Chats
+          </MuiLink>
+        </Link>
+      )}
       <Box ml={3.5}>
         <ConnectButton showBalance={false} chainStatus="icon" />
       </Box>
@@ -177,6 +189,11 @@ function NavigationMenu(props: { displayAccountLink?: boolean; sx?: SxProps }) {
         {isConnected && (
           <Link href={`/accounts/${address}`} passHref legacyBehavior>
             <MenuItem>Account</MenuItem>
+          </Link>
+        )}
+        {isConnected && (
+          <Link href={`/chats`} passHref legacyBehavior>
+            <MenuItem>Chats</MenuItem>
           </Link>
         )}
         <MenuItem component="a" target="_blank" href={CONTACTS.github}>

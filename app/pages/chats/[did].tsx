@@ -1,18 +1,20 @@
+import AccountAvatar from "@/components/account/AccountAvatar";
+import AccountLink from "@/components/account/AccountLink";
 import MessageCard from "@/components/card/MessageCard";
 import SendMessageDialog from "@/components/dialog/SendMessageDialog";
 import SendPrivateFeedbackDialog from "@/components/dialog/SendPrivateFeedbackDialog";
 import EntityList from "@/components/entity/EntityList";
 import Layout from "@/components/layout";
-import { FullWidthSkeleton, LargeLoadingButton } from "@/components/styled";
+import { FullWidthSkeleton, MediumLoadingButton } from "@/components/styled";
 import { DialogContext } from "@/context/dialog";
 import useError from "@/hooks/useError";
 import useSigner from "@/hooks/useSigner";
-import { didToAddress, didToShortAddress } from "@/utils/pushprotocol";
-import { Link as MuiLink, Stack, Typography } from "@mui/material";
+import { didToAddress } from "@/utils/pushprotocol";
+import { useProfilesOwnedBy } from "@lens-protocol/react-web";
+import { Box, Divider, Stack, Typography } from "@mui/material";
 import { IMessageIPFS, PushAPI } from "@pushprotocol/restapi";
 import { ENV } from "@pushprotocol/restapi/src/lib/constants";
 import { EVENTS, createSocketConnection } from "@pushprotocol/socket";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useContext, useEffect, useState } from "react";
 
@@ -26,6 +28,10 @@ export default function Chat() {
   const { handleError } = useError();
   const { signer } = useSigner();
   const [messages, setMessages] = useState<IMessageIPFS[] | undefined>();
+  const { data: accountLensProfiles } = useProfilesOwnedBy({
+    address: didToAddress(did as string),
+    limit: 10,
+  });
 
   async function loadData() {
     setMessages(undefined);
@@ -54,29 +60,40 @@ export default function Chat() {
     }
   }
 
-  // TODO: Rollback
   useEffect(() => {
     loadData();
-    // setMessages([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signer, did]);
 
   return (
     <Layout maxWidth="sm">
       {did && messages ? (
-        <>
-          <Typography variant="h4" fontWeight={700} textAlign="center">
-            💬 Chat with{" "}
-            <Link
-              href={`accounts/${didToAddress(did as string)}`}
-              passHref
-              legacyBehavior
-            >
-              <MuiLink>{didToShortAddress(did as string)}</MuiLink>
-            </Link>
+        <Box display="flex" flexDirection="column" alignItems="center">
+          <Typography fontWeight={700} textAlign="center">
+            Chat w/{" "}
           </Typography>
-          <Stack mt={2} spacing={2} alignItems="center">
-            <LargeLoadingButton
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <AccountAvatar
+              account={didToAddress(did as string)}
+              accountLensProfile={accountLensProfiles?.[0]}
+              size={48}
+              emojiSize={24}
+            />
+            <AccountLink
+              account={didToAddress(did as string)}
+              accountLensProfile={accountLensProfiles?.[0]}
+              variant="h4"
+            />
+          </Stack>
+          <Divider sx={{ width: 1, borderWidth: 2, my: 2 }} />
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="stretch"
+            justifyContent="space-between"
+            width={1}
+          >
+            <MediumLoadingButton
               variant="contained"
               onClick={() =>
                 showDialog?.(
@@ -88,8 +105,8 @@ export default function Chat() {
               }
             >
               Send Message
-            </LargeLoadingButton>
-            <LargeLoadingButton
+            </MediumLoadingButton>
+            <MediumLoadingButton
               variant="outlined"
               onClick={() =>
                 showDialog?.(
@@ -101,7 +118,7 @@ export default function Chat() {
               }
             >
               Send Private Feedback
-            </LargeLoadingButton>
+            </MediumLoadingButton>
           </Stack>
           <EntityList
             entities={messages}
@@ -115,9 +132,9 @@ export default function Chat() {
               />
             )}
             noEntitiesText="😐 no messages"
-            sx={{ mt: 4 }}
+            sx={{ mt: 2 }}
           />
-        </>
+        </Box>
       ) : (
         <FullWidthSkeleton />
       )}
