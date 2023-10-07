@@ -1,9 +1,9 @@
 {
-  "test": {
+  "testnet": {
     "deployed": [
       {
-        "name": "MyERC20Token",
-        "address": "0xd669Cc43B19Abc9505275B474054664A2eff5be4"
+        "name": "PartnerFactory",
+        "address": "0xa33550bcf7F4FE02F9087A55dF6A9078488e1e0A"
       }
     ]
   }

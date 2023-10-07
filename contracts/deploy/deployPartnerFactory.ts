@@ -13,7 +13,7 @@ import type { HardhatRuntimeEnvironment } from "hardhat/types";
 dotenv.config();
 
 // load wallet private key from env file
-const CONTRACT_NAME = "MyERC20Token"; // Contract name must be the same as the file name without the extension
+const CONTRACT_NAME = "PartnerFactory"; // Contract name must be the same as the file name without the extension
 const CONFIG_PATH = path.join(__dirname, "vars.json");
 const NETWORK = process.env.NODE_ENV || "localnet"; // Default to localnet if NODE_ENV is not set
 const PRIVATE_KEY = getPrivateKey(NETWORK);

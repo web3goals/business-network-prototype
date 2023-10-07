@@ -1,9 +1,6 @@
 export function getPrivateKey(network: string): string {
   let privateKey: string | undefined;
 
-  if (network == "test") {
-    privateKey = process.env.WALLET_PRIVATE_KEY_TEST;
-  }
   if (network == "localnet") {
     privateKey = process.env.WALLET_PRIVATE_KEY_LOCALNET;
   }
