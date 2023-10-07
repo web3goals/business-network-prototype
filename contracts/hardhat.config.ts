@@ -7,9 +7,9 @@ import "@matterlabs/hardhat-zksync-verify";
 
 // dynamically changes endpoints for local tests
 export const zkSyncTestnet =
-  process.env.NODE_ENV == "test"
+  process.env.NODE_ENV == "localnet"
     ? {
-        url: "http://127.0.0.1:8011",
+        url: "http://127.0.0.1:3050",
         ethNetwork: "http://127.0.0.1:8545",
         zksync: true,
       }
@@ -17,7 +17,6 @@ export const zkSyncTestnet =
         url: "https://zksync2-testnet.zksync.dev",
         ethNetwork: "goerli",
         zksync: true,
-        // contract verification endpoint
         verifyURL:
           "https://zksync2-testnet-explorer.zksync.dev/contract_verification",
       };
