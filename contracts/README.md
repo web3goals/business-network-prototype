@@ -1,13 +1,12 @@
-# Sample Hardhat Project
+## Commands
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+- Install dependencies - `npm install`
+- Clean project - `npx hardhat clean`
+- Compile contracts - `npx hardhat compile`
+- Run tests - `NODE_ENV=test npx hardhat test --network zkSyncTestnet`
+- Deploy contracts - `npx hardhat deploy-zksync --script deploy-token.ts`
+- Run sandbox script - `npx hardhat run scripts/sandbox.ts --network zkSyncTestnet`
 
-Try running some of the following tasks:
+## Links
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
+- zkSync Hardhat project - https://github.com/matter-labs/zksync-hardhat-ft-template

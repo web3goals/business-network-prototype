@@ -1,0 +1,10 @@
+{
+  "test": {
+    "deployed": [
+      {
+        "name": "MyERC20Token",
+        "address": "0xd669Cc43B19Abc9505275B474054664A2eff5be4"
+      }
+    ]
+  }
+}
