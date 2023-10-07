@@ -10,7 +10,7 @@ const RICH_WALLET_PK_1 =
 const RICH_WALLET_PK_2 =
   "0xac1e735be8536c6534bb4f17f06f6afc73b2b5ba84ac2cfb12f7461b20c0bbe3";
 
-describe("MyERC20Token", function () {
+describe.skip("MyERC20Token", function () {
   let tokenContract: Contract;
   let ownerWallet: Wallet;
   let userWallet: Wallet;

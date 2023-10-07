@@ -3,8 +3,8 @@
 - Install dependencies - `npm install`
 - Clean project - `npx hardhat clean`
 - Compile contracts - `npx hardhat compile`
-- Run tests - `NODE_ENV=localnet npx hardhat test`
-- Deploy contracts - `npx hardhat deploy-zksync --script deployMyERC20Token.ts`
+- Run tests - `npx hardhat test`
+- Deploy contracts - `NODE_ENV=testnet npx hardhat deploy-zksync --script deployMyERC20Token.ts`
 - Run sandbox script - `npx hardhat run scripts/sandbox.ts`
 
 ## Links
