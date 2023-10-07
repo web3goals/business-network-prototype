@@ -11,14 +11,14 @@ import {TransactionHelper, Transaction} from "@matterlabs/zksync-contracts/l2/sy
 import "@matterlabs/zksync-contracts/l2/system-contracts/Constants.sol";
 
 contract Partner is IPaymaster, Ownable {
-    struct Feedback {
+    struct FeedbackParams {
         address author;
         uint date;
         string content;
     }
 
     string public details;
-    Feedback[] public feedback;
+    FeedbackParams[] public feedback;
 
     modifier onlyBootloader() {
         require(
@@ -29,7 +29,7 @@ contract Partner is IPaymaster, Ownable {
         _;
     }
 
-    constructor(string memory _details) {
+    constructor(string memory _details) payable {
         details = _details;
     }
 
@@ -38,10 +38,10 @@ contract Partner is IPaymaster, Ownable {
     }
 
     function postFeedback(string memory _feedback) external {
-        feedback.push(Feedback(msg.sender, block.timestamp, _feedback));
+        feedback.push(FeedbackParams(msg.sender, block.timestamp, _feedback));
     }
 
-    function getFeedback() external view returns (Feedback[] memory) {
+    function getFeedback() external view returns (FeedbackParams[] memory) {
         return feedback;
     }
 
