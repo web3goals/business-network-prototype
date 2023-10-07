@@ -1,6 +1,6 @@
 import { FAKES } from "@/constants/fakes";
 import { Profile } from "@lens-protocol/react-web";
-import { SxProps, Typography } from "@mui/material";
+import { SxProps, Typography, TypographyProps } from "@mui/material";
 
 /**
  * Component with account bio.
@@ -8,6 +8,7 @@ import { SxProps, Typography } from "@mui/material";
 export default function AccountBio(props: {
   account: string;
   accountLensProfile?: Profile;
+  textAlign?: TypographyProps["textAlign"];
   sx?: SxProps;
 }) {
   let bio = undefined;
@@ -20,7 +21,10 @@ export default function AccountBio(props: {
 
   if (bio) {
     return (
-      <Typography textAlign="center" sx={{ maxWidth: 480, ...props.sx }}>
+      <Typography
+        textAlign={props.textAlign || "center"}
+        sx={{ maxWidth: 480, ...props.sx }}
+      >
         {bio}
       </Typography>
     );

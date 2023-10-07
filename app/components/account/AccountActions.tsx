@@ -35,7 +35,7 @@ function JoinNetworkButton() {
 
   return (
     <LargeLoadingButton
-      variant="outlined"
+      variant="contained"
       onClick={() => {
         showDialog?.(<BecomePartnerDialog onClose={closeDialog} />);
       }}
