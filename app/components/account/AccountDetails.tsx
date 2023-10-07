@@ -2,6 +2,7 @@ import { useProfilesOwnedBy } from "@lens-protocol/react-web";
 import { Box, SxProps } from "@mui/material";
 import AccountAvatar from "./AccountAvatar";
 import AccountBio from "./AccountBio";
+import AccountLensLink from "./AccountLensLink";
 import AccountLink from "./AccountLink";
 import AccountTags from "./AccountTags";
 
@@ -42,6 +43,11 @@ export default function AccountDetails(props: {
         variant="h4"
         textAlign="center"
         sx={{ mt: 2 }}
+      />
+      <AccountLensLink
+        account={props.account}
+        accountLensProfile={accountLensProfiles?.[0]}
+        sx={{ mt: 1 }}
       />
       <AccountBio
         account={props.account}
