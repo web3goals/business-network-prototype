@@ -5,13 +5,17 @@ import SendMessageDialog from "@/components/dialog/SendMessageDialog";
 import SendPrivateFeedbackDialog from "@/components/dialog/SendPrivateFeedbackDialog";
 import EntityList from "@/components/entity/EntityList";
 import Layout from "@/components/layout";
-import { FullWidthSkeleton, MediumLoadingButton } from "@/components/styled";
+import {
+  FullWidthSkeleton,
+  MediumLoadingButton,
+  ThickDivider,
+} from "@/components/styled";
 import { DialogContext } from "@/context/dialog";
 import useError from "@/hooks/useError";
 import useSigner from "@/hooks/useSigner";
 import { didToAddress } from "@/utils/pushprotocol";
 import { useProfilesOwnedBy } from "@lens-protocol/react-web";
-import { Box, Divider, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { IMessageIPFS, PushAPI } from "@pushprotocol/restapi";
 import { ENV } from "@pushprotocol/restapi/src/lib/constants";
 import { EVENTS, createSocketConnection } from "@pushprotocol/socket";
@@ -85,7 +89,7 @@ export default function Chat() {
               variant="h4"
             />
           </Stack>
-          <Divider sx={{ width: 1, borderWidth: 2, my: 2 }} />
+          <ThickDivider sx={{ my: 2 }} />
           <Stack
             direction="row"
             spacing={2}

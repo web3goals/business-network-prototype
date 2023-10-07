@@ -1,9 +1,9 @@
-import { Chain, polygonMumbai } from "wagmi/chains";
+import { Chain, zkSyncTestnet } from "wagmi/chains";
 
 interface ChainConfig {
   chain: Chain;
   contracts: {
-    feedback: `0x${string}`;
+    partnerFactory: `0x${string}`;
   };
 }
 
@@ -12,12 +12,12 @@ interface ChainConfig {
  */
 export function getSupportedChainConfigs(): ChainConfig[] {
   const chainConfigs: ChainConfig[] = [];
-  if (process.env.NEXT_PUBLIC_POLYGON_MUMBAI_FEEDBACK_CONTRACT_ADDRESS) {
+  if (process.env.NEXT_PUBLIC_ZK_SYNC_TESTNET_PARTNER_FACTORY_CONTRACT_ADDRESS) {
     chainConfigs.push({
-      chain: polygonMumbai,
+      chain: zkSyncTestnet,
       contracts: {
-        feedback: process.env
-          .NEXT_PUBLIC_POLYGON_MUMBAI_FEEDBACK_CONTRACT_ADDRESS as `0x${string}`,
+        partnerFactory: process.env
+          .NEXT_PUBLIC_ZK_SYNC_TESTNET_PARTNER_FACTORY_CONTRACT_ADDRESS as `0x${string}`,
       },
     });
   }

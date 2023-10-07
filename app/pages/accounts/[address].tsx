@@ -1,15 +1,12 @@
-import AccountAvatar from "@/components/account/AccountAvatar";
-import AccountBio from "@/components/account/AccountBio";
-import AccountLink from "@/components/account/AccountLink";
+import AccountActions from "@/components/account/AccountActions";
+import AccountDetails from "@/components/account/AccountDetails";
+import AccountFeedback from "@/components/account/AccountFeedback";
 import Layout from "@/components/layout";
-import { FullWidthSkeleton, LargeLoadingButton } from "@/components/styled";
-import { isAddressesEqual } from "@/utils/addresses";
-import { addressToDid } from "@/utils/pushprotocol";
-import { useProfilesOwnedBy } from "@lens-protocol/react-web";
-import { Box } from "@mui/material";
-import Link from "next/link";
+import { FullWidthSkeleton } from "@/components/styled";
+import { partnerFactoryAbi } from "@/contracts/abi/partnerFactory";
+import { chainToSupportedChainConfig } from "@/utils/chains";
 import { useRouter } from "next/router";
-import { useAccount } from "wagmi";
+import { useContractRead, useNetwork } from "wagmi";
 
 /**
  * Page with an account.
@@ -17,55 +14,38 @@ import { useAccount } from "wagmi";
 export default function Account() {
   const router = useRouter();
   const { address } = router.query;
-  const { address: connectedAddress } = useAccount();
-  const { data: accountLensProfiles } = useProfilesOwnedBy({
-    address: address as string,
-    limit: 10,
+  const { chain } = useNetwork();
+
+  /**
+   * Define an account partner
+   */
+  const { data: accountPartner } = useContractRead({
+    address: chainToSupportedChainConfig(chain).contracts.partnerFactory,
+    abi: partnerFactoryAbi,
+    functionName: "getPartner",
+    args: [address],
+    enabled: Boolean(address),
   });
 
   return (
     <Layout maxWidth="sm">
-      {address ? (
-        <Box display="flex" flexDirection="column" alignItems="center">
-          {/* Image */}
-          <AccountAvatar
+      {address && accountPartner ? (
+        <>
+          <AccountDetails
             account={address as string}
-            accountLensProfile={accountLensProfiles?.[0]}
-            size={164}
-            emojiSize={64}
+            accountPartner={accountPartner}
           />
-          {/* Name */}
-          <AccountLink
+          <AccountActions
             account={address as string}
-            accountLensProfile={accountLensProfiles?.[0]}
-            variant="h4"
-            textAlign="center"
+            accountPartner={accountPartner}
             sx={{ mt: 2 }}
           />
-          {/* Bio */}
-          <AccountBio
+          <AccountFeedback
             account={address as string}
-            accountLensProfile={accountLensProfiles?.[0]}
-            sx={{ mt: 1 }}
+            accountPartner={accountPartner}
+            sx={{ mt: 6 }}
           />
-          {/* Buttons */}
-          {isAddressesEqual(address as string, connectedAddress) ? (
-            <Link href="/chats" legacyBehavior>
-              <LargeLoadingButton variant="outlined" sx={{ mt: 2 }}>
-                Open Chats
-              </LargeLoadingButton>
-            </Link>
-          ) : (
-            <Link
-              href={`/chats/${addressToDid(address as string)}`}
-              legacyBehavior
-            >
-              <LargeLoadingButton variant="outlined" sx={{ mt: 2 }}>
-                Send Message
-              </LargeLoadingButton>
-            </Link>
-          )}
-        </Box>
+        </>
       ) : (
         <FullWidthSkeleton />
       )}
