@@ -1,33 +1,27 @@
-import { partnerFactoryAbi } from "@/contracts/abi/partnerFactory";
+import { partnerAbi } from "@/contracts/abi/partner";
 import FormikHelper from "@/helper/FormikHelper";
 import useError from "@/hooks/useError";
 import useToasts from "@/hooks/useToast";
 import { theme } from "@/theme";
-import { PartnerDetails } from "@/types";
-import { chainToSupportedChainConfig } from "@/utils/chains";
-import { Dialog, MenuItem, Typography } from "@mui/material";
+import { Dialog, Typography } from "@mui/material";
 import { ethers } from "ethers";
 import { Form, Formik } from "formik";
 import { useState } from "react";
-import { useNetwork } from "wagmi";
 import * as yup from "yup";
-import { Web3Provider } from "zksync-web3";
+import { Web3Provider, utils } from "zksync-web3";
 import {
   DialogCenterContent,
   ExtraLargeLoadingButton,
   WidgetBox,
-  WidgetInputSelect,
   WidgetInputTextField,
   WidgetTitle,
 } from "../styled";
-import useIpfs from "@/hooks/useIpfs";
 
-export default function BecomePartnerDialog(props: {
+export default function PostFeedbackDialog(props: {
+  accountPartner: any;
   isClose?: boolean;
   onClose?: Function;
 }) {
-  const { chain } = useNetwork();
-  const { uploadJsonToIpfs } = useIpfs();
   const { handleError } = useError();
   const { showToastSuccess } = useToasts();
 
@@ -47,48 +41,58 @@ export default function BecomePartnerDialog(props: {
   /**
    * Form states
    */
-  const formTags = [
-    "Developer",
-    "Designer",
-    "Artist",
-    "Game Developer",
-    "Investor",
-  ];
   const [formValues, setFormValues] = useState({
-    tag: formTags[0],
-    sponsorship: 0.001,
+    feedback: "",
   });
   const formValidationSchema = yup.object({
-    tag: yup.string().required(),
-    sponsorship: yup.number().required(),
+    feedback: yup.string().required(),
   });
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   async function submit(values: any) {
     try {
       setIsFormSubmitting(true);
-      // Upload data to IPFS
-      const partnerDetails: PartnerDetails = {
-        tags: [values.tag],
-      };
-      const { uri: partnerDetailsUri } = await uploadJsonToIpfs(partnerDetails);
       // Define provider and signer
       const provider = new Web3Provider((window as any).ethereum);
       const signer = provider.getSigner();
       // Define contract
-      const partnerFactoryContract = new ethers.Contract(
-        chainToSupportedChainConfig(chain).contracts.partnerFactory,
-        partnerFactoryAbi,
+      const partnerContract = new ethers.Contract(
+        props.accountPartner.partner,
+        partnerAbi,
         signer
       );
-      // Use contract to become partner
+      // Define gas price
+      const gasPrice = await provider.getGasPrice();
+      // Encode paymaster flow's input
+      const paymasterParams = utils.getPaymasterParams(
+        partnerContract.address,
+        {
+          type: "General",
+          innerInput: new Uint8Array(),
+        }
+      );
+      // Estimate gas fee for transaction
+      const gasLimit = await partnerContract.estimateGas.postFeedback(
+        values.feedback,
+        {
+          customData: {
+            gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+            paymasterParams: paymasterParams,
+          },
+        }
+      );
+      const fee = gasPrice.mul(gasLimit.toString());
+      // Send transaction using paymaster
       await (
-        await partnerFactoryContract.becomePartner(partnerDetailsUri, {
-          value: ethers.utils.parseEther(String(values.sponsorship)),
+        await partnerContract.postFeedback(values.feedback, {
+          customData: {
+            paymasterParams: paymasterParams,
+            gasPerPubdata: utils.DEFAULT_GAS_PER_PUBDATA_LIMIT,
+          },
         })
       ).wait();
       // Display success toast and close dialog
-      showToastSuccess("You joined the network, data will be updated soon!");
+      showToastSuccess("Feedback posted, data will be updated soon!");
       close();
     } catch (error) {
       handleError(error as Error, true);
@@ -105,12 +109,10 @@ export default function BecomePartnerDialog(props: {
     >
       <DialogCenterContent>
         <Typography variant="h4" textAlign="center" fontWeight={700}>
-          🌍️ Join the network
+          🗣️ Post feedback
         </Typography>
         <Typography textAlign="center" mt={1}>
-          Define tag that will be associated with your account and the amount of
-          ethers that will be used to sponsor the transactions of other people
-          who want to post a feedback on your page
+          that may motivate others to connect with that person
         </Typography>
         <Formik
           initialValues={formValues}
@@ -126,36 +128,21 @@ export default function BecomePartnerDialog(props: {
               }}
             >
               <FormikHelper onChange={(values: any) => setFormValues(values)} />
-              {/* Tag */}
+              {/* Feedback */}
               <WidgetBox bgcolor={theme.palette.primary.main} mt={2}>
-                <WidgetTitle>Tag</WidgetTitle>
-                <WidgetInputSelect
-                  id="tag"
-                  name="tag"
-                  value={values.tag}
-                  onChange={handleChange}
-                  disabled={isFormSubmitting}
-                  sx={{ width: 1 }}
-                >
-                  {formTags.map((tag, index) => (
-                    <MenuItem value={tag} key={index}>
-                      {tag}
-                    </MenuItem>
-                  ))}
-                </WidgetInputSelect>
-              </WidgetBox>
-              {/* Sponsorhip */}
-              <WidgetBox bgcolor={theme.palette.primary.main} mt={2}>
-                <WidgetTitle>Sponsorship</WidgetTitle>
+                <WidgetTitle>Feedback</WidgetTitle>
                 <WidgetInputTextField
-                  id="sponsorship"
-                  name="sponsorship"
-                  type="number"
-                  value={values.sponsorship}
+                  id="feedback"
+                  name="feedback"
+                  placeholder="Great artist!"
+                  value={values.feedback}
                   onChange={handleChange}
-                  error={touched.sponsorship && Boolean(errors.sponsorship)}
-                  helperText={touched.sponsorship && errors.sponsorship}
+                  error={touched.feedback && Boolean(errors.feedback)}
+                  helperText={touched.feedback && errors.feedback}
                   disabled={isFormSubmitting}
+                  multiline
+                  minRows={2}
+                  maxRows={8}
                   sx={{ width: 1 }}
                 />
               </WidgetBox>

@@ -8,4 +8,10 @@ export const FAKES: {
     bio:
       "Developer passionate about coding and creating innovative solutions. Always seeking to expand my skills and contribute to exciting projects 🚀",
   },
+  "0X3F121F9A16BD6C83D325985417ADA3FE0F517B7D": {
+    name: "Alice Vandy",
+    avatar:
+      "https://lh3.googleusercontent.com/_26llZkGUntbt537VDPz3W6SutkgzLwEZ2-SeZH4YvP0ZFuMdnnJvhxZ_ZDLRUO3F3TgTaH4yVlGYUw7IINlk-3v3DMOsoUOZoE=s1000",
+    bio: "Artist 🎨",
+  },
 };

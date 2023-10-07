@@ -16,7 +16,6 @@ import {
 } from "../styled";
 import AddVcDialog from "./AddVcDialog";
 
-// TODO: Display list of VCs stored in memory
 export default function SendPrivateFeedbackDialog(props: {
   recipientDid: string;
   isClose?: boolean;
