@@ -76,7 +76,7 @@ export default function SendPrivateFeedbackDialog(props: {
                 showDialog?.(<AddVcDialog onClose={closeDialog} />);
               }}
             >
-              Send Custom VC
+              Add Custom VC
             </LargeLoadingButton>
           </>
         ) : (
