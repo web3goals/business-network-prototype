@@ -42,7 +42,7 @@ export default function Chat() {
     try {
       if (signer && did) {
         // Init user
-        const user = await PushAPI.initialize(signer, { env: ENV.STAGING });
+        const user = await PushAPI.initialize(signer, { env: ENV.PROD });
         // Load messages
         const messages = await user.chat.history(did as string);
         setMessages(messages);
@@ -51,7 +51,7 @@ export default function Chat() {
           user: did as string,
           socketType: "chat",
           socketOptions: { autoConnect: true, reconnectionAttempts: 3 },
-          env: ENV.STAGING,
+          env: ENV.PROD,
         });
         pushSDKSocket?.on(EVENTS.CHAT_RECEIVED_MESSAGE, (message) => {
           user.chat

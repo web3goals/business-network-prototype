@@ -26,7 +26,7 @@ export default function Chats() {
       setChats(undefined);
       setRequests(undefined);
       if (signer) {
-        const user = await PushAPI.initialize(signer, { env: ENV.STAGING });
+        const user = await PushAPI.initialize(signer, { env: ENV.PROD });
         const chats = await user.chat.list("CHATS");
         const requests = await user.chat.list("REQUESTS");
         setChats(chats);
@@ -101,7 +101,7 @@ function RequestCard(props: { request: IFeeds }) {
       if (!signer) {
         throw new Error(`Signer is not defined`);
       }
-      const user = await PushAPI.initialize(signer, { env: ENV.STAGING });
+      const user = await PushAPI.initialize(signer, { env: ENV.PROD });
       await user.chat.accept(props.request.did);
       showToastSuccess("Request accepted, refresh the page to update data");
       setIsFormSubmitted(true);
