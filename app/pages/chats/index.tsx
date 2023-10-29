@@ -27,8 +27,12 @@ export default function Chats() {
       setRequests(undefined);
       if (signer) {
         const user = await PushAPI.initialize(signer, { env: ENV.PROD });
-        const chats = await user.chat.list("CHATS");
-        const requests = await user.chat.list("REQUESTS");
+        const chats = (await user.chat.list("CHATS")).filter(
+          (chat) => chat.did
+        );
+        const requests = (await user.chat.list("REQUESTS")).filter(
+          (chat) => chat.did
+        );
         setChats(chats);
         setRequests(requests);
       }
